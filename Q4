@@ -1,0 +1,126 @@
+#include <iostream>
+#include <queue>
+#include <sstream>
+#include <string>
+
+
+using namespace std;
+
+
+// Definition for a binary tree node.
+struct TreeNode {
+    int val;
+    TreeNode *left;
+    TreeNode *right;
+    TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+};
+
+
+class Codec {
+public:
+    // Encodes a tree to a single string.
+    string serialize(TreeNode* root) {
+        if (!root) {
+            return "NULL,";
+        }
+        return to_string(root->val) + "," + serialize(root->left) + serialize(root->right);
+    }
+
+
+    // Decodes your encoded data to tree.
+    TreeNode* deserialize(string data) {
+        queue<string> q;
+        stringstream ss(data);
+        string s;
+        while (getline(ss, s, ',')) {
+            q.push(s);
+        }
+        return deserialize_helper(q);
+    }
+
+
+private:
+    TreeNode* deserialize_helper(queue<string>& q) {
+        string s = q.front();
+        q.pop();
+        if (s == "NULL") {
+            return nullptr;
+        }
+        TreeNode* root = new TreeNode(stoi(s));
+        root->left = deserialize_helper(q);
+        root->right = deserialize_helper(q);
+        return root;
+    }
+};
+
+
+// Helper function to create a new TreeNode
+TreeNode* createNode(int val) {
+    return new TreeNode(val);
+}
+
+
+// Function to input a binary tree from the user
+TreeNode* inputTree() {
+    int val;
+    cout << "Enter the value for the root node (-1 for NULL): ";
+    cin >> val;
+    if (val == -1) {
+        return nullptr;
+    }
+    TreeNode* root = new TreeNode(val);
+    queue<TreeNode*> q;
+    q.push(root);
+
+
+    while (!q.empty()) {
+        TreeNode* current = q.front();
+        q.pop();
+
+
+        cout << "Enter the left child of " << current->val << " (-1 for NULL): ";
+        cin >> val;
+        if (val != -1) {
+            current->left = new TreeNode(val);
+            q.push(current->left);
+        }
+
+
+        cout << "Enter the right child of " << current->val << " (-1 for NULL): ";
+        cin >> val;
+        if (val != -1) {
+            current->right = new TreeNode(val);
+            q.push(current->right);
+        }
+    }
+
+
+    return root;
+}
+
+
+int main() {
+    // Input the binary tree from the user
+    TreeNode* root = inputTree();
+
+
+    // Initialize codec
+    Codec codec;
+
+
+    // Serialize the tree
+    string serialized = codec.serialize(root);
+    cout << "Serialized tree: " << serialized << endl;
+
+
+    // Deserialize the serialized data
+    TreeNode* deserializedRoot = codec.deserialize(serialized);
+
+
+    // Output the deserialized tree (in serialized form for verification)
+    string deserialized = codec.serialize(deserializedRoot);
+    cout << "Deserialized tree: " << deserialized << endl;
+
+
+    return 0;
+}
